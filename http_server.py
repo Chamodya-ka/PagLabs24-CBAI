@@ -1,5 +1,8 @@
+# import json
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import cgi
+from unittest import removeResult
+
 import keras
 import pickle
 import pandas as pd
@@ -23,7 +26,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             final_inf_date.pop("description")
             return loaded_model(final_inf_date)[0], loaded_model(final_inf_date)[1]
 
-    def do_POST(self):
+    def do_GET(self):
         print("processing...")
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
         pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
@@ -32,11 +35,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         print(body)
 
         print("preprocessing")
-        do_retry, timeout = self.do_preprocessing(body)
+        result = self.do_preprocessing(body)
 
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(bytes(str(do_retry)+","+str(timeout),"UTF-8"))
+        # self.wfile.write(json.dumps({'do_retry': result[0], 'timeout': result[1]}))
+        # post process
+        response = -1
+        if (result[0]>0.5):
+            response = float(result[1][0])
+        self.wfile.write(bytes(str(response),"UTF-8"))
 
 
 print("loading models")
