@@ -2,6 +2,7 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import cgi
 from unittest import removeResult
+from urllib.parse import urlparse, parse_qs
 
 import keras
 import pickle
@@ -28,10 +29,18 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print("processing...")
-        ctype, pdict = cgi.parse_header(self.headers['content-type'])
-        pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
-        body = cgi.parse_multipart(self.rfile, pdict)
-
+        url = urlparse(self.path)
+        query_params = parse_qs(url.query)
+        print(query_params)
+        body = {}
+        body['code'] = (query_params["code"] if ("code" in query_params) else "")
+        body['protocol'] = query_params["protocol"] if ("protocol" in query_params) else ""
+        body['description'] = query_params["description"] if ("description" in query_params) else ""
+        body['retryCount'] = query_params["retryCount"] if ("retryCount" in query_params) else ""
+        # ctype, pdict = cgi.parse_header(self.headers['content-type'])
+        # pdict['boundary'] = bytes(pdict['boundary'], "utf-8")
+        # body = cgi.parse_multipart(self.rfile, pdict)
+        #
         print(body)
 
         print("preprocessing")
