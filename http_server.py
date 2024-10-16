@@ -42,8 +42,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         # self.wfile.write(json.dumps({'do_retry': result[0], 'timeout': result[1]}))
         # post process
         response = -1
-        if (result[0]>0.5):
-            response = float(result[1][0])
+        print(float(result[0]),float(result[1]))
+        if (float(result[0])>0.5):
+            response = float(result[1])
         self.wfile.write(bytes(str(response),"UTF-8"))
 
 
